@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juego de Figuras Literarias</title>
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #eef2f8;
+  color: #111;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+.app {
+  background: #fff;
+  padding: 25px 30px;
+  border-radius: 12px;
+  width: 450px;
+  max-width: 95%;
+  text-align: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+}
+h1 { margin-bottom: 15px; }
+.question { font-size: 18px; min-height: 60px; margin: 20px 0; }
+.options { display: grid; gap: 10px; }
+.option {
+  padding: 12px;
+  border-radius: 8px;
+  border: 2px solid #aaa;
+  background: #e2e8f0;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+.option:hover { background: #cbd5e1; }
+.option.correct { background: #34d399; border-color: #10b981; color: #fff; }
+.option.wrong { background: #f87171; border-color: #ef4444; color: #fff; }
+.timer { font-weight: 700; margin-top: 10px; font-size: 16px; }
+.btn {
+  margin-top: 15px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #3b82f6;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn:hover { background: #2563eb; }
+.result { font-size: 24px; margin-top: 20px; font-weight: 700; }
+.progress { height: 10px; background: #ddd; border-radius: 5px; margin-top: 15px; }
+.progress-bar { height: 100%; background: #3b82f6; width: 0%; border-radius: 5px; transition: 0.4s; }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>Figuras Literarias</h1>
+  <div class="question" id="question">Cargando...</div>
+  <div class="options" id="options"></div>
+  <div class="timer" id="timer">15s</div>
+  <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+  <button class="btn" id="nextBtn" style="display:none;">Siguiente</button>
+  <div class="result" id="result"></div>
+</div>
+<script>
+const questionsBank = [
+{q:"Mi mamá me mima mucho.", a:"Aliteración"},
+{q:"Vendrá la vendimia y vendrá la venta.", a:"Paranomasia"},
+{q:"Vine, vi, vencí.", a:"Asíndeton"},
+{q:"No quiero llanto, no quiero dolor, no quiero miedo.", a:"Epífora"},
+{q:"Verde que te quiero verde, verde viento, verdes ramas.", a:"Anáfora"},
+{q:"De verdes sauces hay un montón en el río.", a:"Hipérbaton"},
+{q:"Y ríe y llora y canta y salta el niño.", a:"Polisíndeton"},
+{q:"Ella estudia matemáticas; él, física.", a:"Elipsis"},
+{q:"Riqueza con pobreza termina, pobreza con riqueza empieza.", a:"Epanadiplosis"},
+{q:"El rey de los animales.", a:"Perífrasis"},
+{q:"¡Qué puntual eres!", a:"Ironía"},
+{q:"Temer temeroso teme a lo temido.", a:"Políptoton"},
+{q:"La luna me guiaba con sus ojos brillantes.", a:"Personificación"},
+{q:"Los coches rugían por la calle como bestias.", a:"Animalización"},
+{q:"El miedo produce tensión; la tensión genera ansiedad.", a:"Anadiplosis"},
+{q:"Escucho el dulce aroma azul del otoño.", a:"Sinestesia"},
+{q:"Tus dientes son perlas.", a:"Metáfora"},
+{q:"Lo vi con mis propios ojos.", a:"Pleonasmo"},
+{q:"Beber un vaso.", a:"Metonimia"},
+{q:"Blanca nieve cubría el valle.", a:"Epíteto"},
+{q:"Tengo tanta hambre que me comería un elefante.", a:"Hipérbole"},
+{q:"Tengo frío y calor a la vez.", a:"Antítesis"},
+{q:"Corre como el viento.", a:"Símil"}
+];
+
+let gameQuestions = [];
+let currentIndex = 0;
+let score = 0;
+let timer = 15;
+let timerInterval;
+
+const questionEl = document.getElementById("question");
+const optionsEl = document.getElementById("options");
+const timerEl = document.getElementById("timer");
+const nextBtn = document.getElementById("nextBtn");
+const resultEl = document.getElementById("result");
+const progressBar = document.getElementById("progressBar");
+
+function shuffle(array){for(let i=array.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[array[i],array[j]]=[array[j],array[i]];}}
+
+function startGame(){
+score=0;currentIndex=0;resultEl.textContent="";progressBar.style.width="0%";
+gameQuestions = [...questionsBank];
+shuffle(gameQuestions);
+gameQuestions = gameQuestions.slice(0,10);
+showQuestion();
+}
+
+function showQuestion(){
+clearInterval(timerInterval);
+timer=15;
+timerEl.textContent = timer+"s";
+const q = gameQuestions[currentIndex];
+questionEl.textContent = q.q;
+optionsEl.innerHTML="";
+const figures = [
+"Aliteración","Paranomasia","Asíndeton","Epífora","Anáfora","Hipérbaton",
+"Polisíndeton","Elipsis","Epanadiplosis","Perífrasis","Ironía","Políptoton",
+"Personificación","Animalización","Anadiplosis","Sinestesia","Metáfora",
+"Pleonasmo","Metonimia","Epíteto","Hipérbole","Antítesis","Símil"
+];
+shuffle(figures);
+let choices = figures.slice(0,3);
+if(!choices.includes(q.a)) choices[0]=q.a;
+shuffle(choices);
+choices.forEach(f=>{
+const btn = document.createElement("button");
+btn.className="option";
+btn.textContent=f;
+btn.onclick=()=>checkAnswer(f);
+optionsEl.appendChild(btn);
+});
+timerInterval = setInterval(()=>{
+timer--;
+timerEl.textContent = timer+"s";
+if(timer<=0){clearInterval(timerInterval);checkAnswer(null);}
+},1000);
+}
+
+function checkAnswer(selected){
+clearInterval(timerInterval);
+const q = gameQuestions[currentIndex];
+const buttons = document.querySelectorAll(".option");
+buttons.forEach(btn=>{
+if(btn.textContent===q.a) btn.classList.add("correct");
+if(selected && btn.textContent===selected && selected!==q.a) btn.classList.add("wrong");
+btn.disabled=true;
+});
+if(selected===q.a) score++;
+nextBtn.style.display="inline-block";
+}
+
+nextBtn.onclick=()=>{
+currentIndex++;
+if(currentIndex<gameQuestions.length){showQuestion();nextBtn.style.display="none";}
+else{showResult();}
+}
+
+function showResult(){
+questionEl.textContent="";
+optionsEl.innerHTML="";
+nextBtn.style.display="none";
+resultEl.textContent="Resultado final: "+score+" / "+gameQuestions.length;
+}
+
+startGame(); </script>
+
+</body>
+</html>
