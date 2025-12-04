@@ -13,36 +13,38 @@ body {
   color: #111;
   display: flex;
   justify-content: center;
-  align-items: center;
-  height: 100vh;
+  align-items: flex-start; /* permite scroll y evita que quede muy apretado */
+  min-height: 100vh;
+  padding-top: 40px;
 }
 .app {
   background: #fff;
-  padding: 25px 30px;
+  padding: 28px 32px; /* corregido y más espacio */
   border-radius: 12px;
-  width: 450px;
-  max-width: 95%;
+  width: 540px;
+  max-width: 96%;
   text-align: center;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
 }
-h1 { margin-bottom: 15px; }
-.question { font-size: 18px; min-height: 60px; margin: 20px 0; }
-.options { display: grid; gap: 10px; }
+h1 { margin-bottom: 18px; }
+.question { font-size: 18px; min-height: 80px; margin: 20px 0; line-height: 1.4; }
+.options { display: grid; gap: 12px; margin-top: 8px; }
 .option {
-  padding: 12px;
+  padding: 14px 12px;
   border-radius: 8px;
   border: 2px solid #aaa;
   background: #e2e8f0;
   cursor: pointer;
   font-weight: 600;
-  transition: 0.2s;
+  transition: 0.18s;
+  text-align: left;
 }
 .option:hover { background: #cbd5e1; }
 .option.correct { background: #34d399; border-color: #10b981; color: #fff; }
 .option.wrong { background: #f87171; border-color: #ef4444; color: #fff; }
-.timer { font-weight: 700; margin-top: 10px; font-size: 16px; }
+.timer { font-weight: 700; margin-top: 12px; font-size: 16px; }
 .btn {
-  margin-top: 15px;
+  margin-top: 16px;
   padding: 10px 18px;
   border: none;
   border-radius: 8px;
@@ -51,13 +53,14 @@ h1 { margin-bottom: 15px; }
   font-weight: 700;
   cursor: pointer;
 }
+.btn + .btn { margin-left: 8px; }
 .btn:hover { background: #2563eb; }
-.result { font-size: 24px; margin-top: 20px; font-weight: 700; }
-.progress { height: 10px; background: #ddd; border-radius: 5px; margin-top: 15px; }
+.result { font-size: 22px; margin-top: 18px; font-weight: 700; }
+.progress { height: 10px; background: #ddd; border-radius: 5px; margin-top: 14px; }
 .progress-bar { height: 100%; background: #3b82f6; width: 0%; border-radius: 5px; transition: 0.4s; }
 
 .total-time {
-  font-size: 20px;
+  font-size: 18px;
   margin-top: 10px;
   font-weight: 700;
 }
@@ -71,6 +74,7 @@ h1 { margin-bottom: 15px; }
   <div class="timer" id="timer">15s</div>
   <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
   <button class="btn" id="nextBtn" style="display:none;">Siguiente</button>
+  <button class="btn" id="playAgainBtn" style="display:none; margin-left:8px;">Jugar de nuevo</button>
   <div class="result" id="result"></div>
   <div class="total-time" id="totalTime"></div>
 </div>
@@ -193,6 +197,7 @@ const questionEl = document.getElementById("question");
 const optionsEl = document.getElementById("options");
 const timerEl = document.getElementById("timer");
 const nextBtn = document.getElementById("nextBtn");
+const playAgainBtn = document.getElementById("playAgainBtn");
 const resultEl = document.getElementById("result");
 const totalTimeEl = document.getElementById("totalTime");
 const progressBar = document.getElementById("progressBar");
@@ -203,7 +208,7 @@ function startGame(){
 score=0;currentIndex=0;resultEl.textContent="";progressBar.style.width="0%";
 totalTime = 0;
 totalTimeEl.textContent = "";
-
+playAgainBtn.style.display = "none";
 gameQuestions = [...questionsBank];
 shuffle(gameQuestions);
 gameQuestions = gameQuestions.slice(0,10);
@@ -278,8 +283,10 @@ nextBtn.style.display="none";
 resultEl.textContent="Resultado final: "+score+" / "+gameQuestions.length;
 
 totalTimeEl.textContent = "Tiempo total: " + totalTime + " segundos";
+playAgainBtn.style.display = "inline-block";
 }
 
+playAgainBtn.onclick = () => startGame();
 startGame();
 </script>
 
