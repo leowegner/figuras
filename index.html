@@ -55,6 +55,12 @@ h1 { margin-bottom: 15px; }
 .result { font-size: 24px; margin-top: 20px; font-weight: 700; }
 .progress { height: 10px; background: #ddd; border-radius: 5px; margin-top: 15px; }
 .progress-bar { height: 100%; background: #3b82f6; width: 0%; border-radius: 5px; transition: 0.4s; }
+
+.total-time {
+  font-size: 20px;
+  margin-top: 10px;
+  font-weight: 700;
+}
 </style>
 </head>
 <body>
@@ -66,7 +72,9 @@ h1 { margin-bottom: 15px; }
   <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
   <button class="btn" id="nextBtn" style="display:none;">Siguiente</button>
   <div class="result" id="result"></div>
+  <div class="total-time" id="totalTime"></div>
 </div>
+
 <script>
 const questionsBank = [
 {q:"Mi perro pinta paredes para pasar el rato.", a:"Personificación"},
@@ -169,8 +177,6 @@ const questionsBank = [
 {q:"El río hablaba con voz cansada.", a:"Personificación"},
 {q:"Frío ardiente me recorrió.", a:"Antítesis"},
 {q:"Temiendo teme el temeroso.", a:"Políptoton"}
-
-
 ];
 
 let gameQuestions = [];
@@ -179,20 +185,31 @@ let score = 0;
 let timer = 15;
 let timerInterval;
 
+// NUEVO TIMER TOTAL
+let totalTime = 0;
+let totalInterval;
+
 const questionEl = document.getElementById("question");
 const optionsEl = document.getElementById("options");
 const timerEl = document.getElementById("timer");
 const nextBtn = document.getElementById("nextBtn");
 const resultEl = document.getElementById("result");
+const totalTimeEl = document.getElementById("totalTime");
 const progressBar = document.getElementById("progressBar");
 
 function shuffle(array){for(let i=array.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[array[i],array[j]]=[array[j],array[i]];}}
 
 function startGame(){
 score=0;currentIndex=0;resultEl.textContent="";progressBar.style.width="0%";
+totalTime = 0;
+totalTimeEl.textContent = "";
+
 gameQuestions = [...questionsBank];
 shuffle(gameQuestions);
 gameQuestions = gameQuestions.slice(0,10);
+
+totalInterval = setInterval(()=>{ totalTime++; },1000);
+
 showQuestion();
 }
 
@@ -200,19 +217,23 @@ function showQuestion(){
 clearInterval(timerInterval);
 timer=15;
 timerEl.textContent = timer+"s";
+
 const q = gameQuestions[currentIndex];
 questionEl.textContent = q.q;
 optionsEl.innerHTML="";
+
 const figures = [
 "Aliteración","Paranomasia","Asíndeton","Epífora","Anáfora","Hipérbaton",
 "Polisíndeton","Elipsis","Epanadiplosis","Perífrasis","Ironía","Políptoton",
 "Personificación","Animalización","Anadiplosis","Sinestesia","Metáfora",
 "Pleonasmo","Metonimia","Epíteto","Hipérbole","Antítesis","Símil"
 ];
+
 shuffle(figures);
 let choices = figures.slice(0,3);
 if(!choices.includes(q.a)) choices[0]=q.a;
 shuffle(choices);
+
 choices.forEach(f=>{
 const btn = document.createElement("button");
 btn.className="option";
@@ -220,6 +241,7 @@ btn.textContent=f;
 btn.onclick=()=>checkAnswer(f);
 optionsEl.appendChild(btn);
 });
+
 timerInterval = setInterval(()=>{
 timer--;
 timerEl.textContent = timer+"s";
@@ -247,13 +269,19 @@ else{showResult();}
 }
 
 function showResult(){
+clearInterval(totalInterval);
+
 questionEl.textContent="";
 optionsEl.innerHTML="";
 nextBtn.style.display="none";
+
 resultEl.textContent="Resultado final: "+score+" / "+gameQuestions.length;
+
+totalTimeEl.textContent = "Tiempo total: " + totalTime + " segundos";
 }
 
-startGame(); </script>
+startGame();
+</script>
 
 </body>
 </html>
